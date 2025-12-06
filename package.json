@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Simple Node.js API for posting tasks",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0",
+    "pg": "^8.11.5"
+  },
+  "keywords": [
+    "api",
+    "node"
+  ],
+  "license": "MIT"
+}
