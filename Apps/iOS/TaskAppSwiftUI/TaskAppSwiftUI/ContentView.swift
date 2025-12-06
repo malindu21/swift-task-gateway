@@ -83,7 +83,17 @@ struct TaskListScreen: View {
             } else if viewModel.tasks.isEmpty {
                 EmptyStateView()
             } else {
-                TaskListView(tasks: viewModel.tasks)
+                TaskListView(
+                    tasks: viewModel.tasks,
+                    updatingTaskIds: viewModel.updatingTaskIds,
+                    deletingTaskIds: viewModel.deletingTaskIds,
+                    onToggle: { task in
+                        Task { await viewModel.toggleStatus(for: task) }
+                    },
+                    onDelete: { task in
+                        Task { await viewModel.deleteTask(id: task.id) }
+                    }
+                )
             }
         }
         .animation(.easeInOut, value: viewModel.tasks.count)
@@ -103,13 +113,29 @@ struct TaskListScreen: View {
 
 struct TaskListView: View {
     let tasks: [TaskItem]
+    let updatingTaskIds: Set<Int>
+    let deletingTaskIds: Set<Int>
+    let onToggle: (TaskItem) -> Void
+    let onDelete: (TaskItem) -> Void
 
     var body: some View {
         List(tasks) { task in
-            TaskRowView(task: task)
-                .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+            TaskRowView(
+                task: task,
+                isUpdating: updatingTaskIds.contains(task.id),
+                onToggle: { onToggle(task) }
+            )
+            .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 16))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    onDelete(task)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                .disabled(deletingTaskIds.contains(task.id))
+            }
         }
         .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
@@ -118,17 +144,32 @@ struct TaskListView: View {
 
 struct TaskRowView: View {
     let task: TaskItem
+    let isUpdating: Bool
+    let onToggle: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(task.status ? Color.green.opacity(0.15) : Color.gray.opacity(0.12))
-                    .frame(width: 32, height: 32)
-                Image(systemName: task.status ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(task.status ? .green : .secondary)
-                    .font(.title3)
+            Button(action: onToggle) {
+                ZStack {
+                    Circle()
+                        .fill(task.status ? Color.green.opacity(0.15) : Color.gray.opacity(0.12))
+                        .frame(width: 32, height: 32)
+
+                    if isUpdating {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(task.status ? .green : .gray)
+                            .scaleEffect(0.7)
+                    } else {
+                        Image(systemName: task.status ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(task.status ? .green : .secondary)
+                            .font(.title3)
+                    }
+                }
             }
+            .buttonStyle(.plain)
+            .disabled(isUpdating)
+            .accessibilityLabel(task.status ? "Mark as open" : "Mark as done")
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(task.task)

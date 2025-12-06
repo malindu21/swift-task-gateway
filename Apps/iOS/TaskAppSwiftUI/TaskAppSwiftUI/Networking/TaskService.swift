@@ -86,4 +86,53 @@ actor TaskService {
 
         return try decoder.decode(TaskItem.self, from: data)
     }
+
+    func updateTaskStatus(id: Int, status: Bool) async throws -> TaskItem {
+        guard let url = URL(string: "\(urlString)/\(id)/status") else {
+            throw NetworkError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["status": status])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.serverError("Server returned status code \(httpResponse.statusCode)")
+        }
+
+        let decoder = JSONDecoder()
+
+        if let taskResponse = try? decoder.decode(TaskResponse.self, from: data),
+           let updatedTask = taskResponse.data.first {
+            return updatedTask
+        }
+
+        return try decoder.decode(TaskItem.self, from: data)
+    }
+
+    func deleteTask(id: Int) async throws {
+        guard let url = URL(string: "\(urlString)/\(id)") else {
+            throw NetworkError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.serverError("Server returned status code \(httpResponse.statusCode)")
+        }
+    }
 }

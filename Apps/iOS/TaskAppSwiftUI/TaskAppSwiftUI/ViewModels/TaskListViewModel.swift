@@ -5,6 +5,8 @@ final class TaskListViewModel: ObservableObject {
     @Published private(set) var tasks: [TaskItem] = []
     @Published var isLoading = false
     @Published var isAddingTask = false
+    @Published var updatingTaskIds: Set<Int> = []
+    @Published var deletingTaskIds: Set<Int> = []
     @Published var errorMessage: String?
     @Published var isShowingNewTaskSheet = false
 
@@ -45,5 +47,45 @@ final class TaskListViewModel: ObservableObject {
         }
 
         isAddingTask = false
+    }
+
+    func toggleStatus(for task: TaskItem) async {
+        guard !updatingTaskIds.contains(task.id) else { return }
+
+        updatingTaskIds.insert(task.id)
+        let previousTasks = tasks
+
+        let toggledStatus = !task.status
+        tasks = tasks.map { item in
+            guard item.id == task.id else { return item }
+            return TaskItem(id: item.id, task: item.task, status: toggledStatus, createdAt: item.createdAt)
+        }
+
+        do {
+            let updated = try await service.updateTaskStatus(id: task.id, status: toggledStatus)
+            tasks = tasks.map { $0.id == updated.id ? updated : $0 }
+        } catch {
+            tasks = previousTasks
+            errorMessage = error.localizedDescription
+        }
+
+        updatingTaskIds.remove(task.id)
+    }
+
+    func deleteTask(id: Int) async {
+        guard !deletingTaskIds.contains(id) else { return }
+
+        deletingTaskIds.insert(id)
+        let previousTasks = tasks
+        tasks.removeAll { $0.id == id }
+
+        do {
+            try await service.deleteTask(id: id)
+        } catch {
+            tasks = previousTasks
+            errorMessage = error.localizedDescription
+        }
+
+        deletingTaskIds.remove(id)
     }
 }
