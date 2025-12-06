@@ -84,6 +84,10 @@ actor TaskService {
             return createdTask
         }
 
+        if let envelope = try? decoder.decode(TaskDataResponse.self, from: data) {
+            return envelope.data
+        }
+
         return try decoder.decode(TaskItem.self, from: data)
     }
 
@@ -112,6 +116,10 @@ actor TaskService {
         if let taskResponse = try? decoder.decode(TaskResponse.self, from: data),
            let updatedTask = taskResponse.data.first {
             return updatedTask
+        }
+
+        if let envelope = try? decoder.decode(TaskDataResponse.self, from: data) {
+            return envelope.data
         }
 
         return try decoder.decode(TaskItem.self, from: data)

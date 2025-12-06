@@ -4,6 +4,10 @@ struct TaskResponse: Codable {
     let data: [TaskItem]
 }
 
+struct TaskDataResponse: Codable {
+    let data: TaskItem
+}
+
 struct TaskItem: Codable, Identifiable {
     let id: Int
     let task: String
