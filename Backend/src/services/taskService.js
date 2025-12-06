@@ -20,7 +20,22 @@ const listTasks = async () => {
   return result.rows.map(mapRow);
 };
 
+const updateTaskStatus = async ({ id, status }) => {
+  const result = await pool.query(
+    'UPDATE tasks SET status = $2 WHERE id = $1 RETURNING id, task, status, created_at;',
+    [id, status],
+  );
+  return result.rowCount ? mapRow(result.rows[0]) : null;
+};
+
+const deleteTask = async (id) => {
+  const result = await pool.query('DELETE FROM tasks WHERE id = $1 RETURNING id;', [id]);
+  return result.rowCount > 0;
+};
+
 module.exports = {
   createTask,
   listTasks,
+  updateTaskStatus,
+  deleteTask,
 };
