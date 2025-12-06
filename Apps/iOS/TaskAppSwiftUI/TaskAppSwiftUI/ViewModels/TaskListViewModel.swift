@@ -54,6 +54,7 @@ final class TaskListViewModel: ObservableObject {
         guard !updatingTaskIds.contains(task.id) else { return }
 
         updatingTaskIds.insert(task.id)
+        errorMessage = nil
         let previousTasks = tasks
 
         let toggledStatus = !task.status
@@ -78,6 +79,7 @@ final class TaskListViewModel: ObservableObject {
         guard !deletingTaskIds.contains(id) else { return }
 
         deletingTaskIds.insert(id)
+        errorMessage = nil
         let previousTasks = tasks
         tasks.removeAll { $0.id == id }
 
@@ -95,6 +97,7 @@ final class TaskListViewModel: ObservableObject {
     private func refreshTasksFromServer() async {
         do {
             tasks = try await service.fetchTasks()
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
