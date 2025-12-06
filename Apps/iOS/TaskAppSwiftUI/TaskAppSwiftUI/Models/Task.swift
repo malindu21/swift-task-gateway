@@ -1,10 +1,10 @@
 import Foundation
 
 struct TaskResponse: Codable {
-    let data: [Task]
+    let data: [TaskItem]
 }
 
-struct Task: Codable, Identifiable {
+struct TaskItem: Codable, Identifiable {
     let id: Int
     let task: String
     let status: Bool

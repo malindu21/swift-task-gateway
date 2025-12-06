@@ -23,7 +23,7 @@ enum NetworkError: LocalizedError {
 actor TaskService {
     private let urlString = "https://swift-task-gateway-743d3a89ff77.herokuapp.com/tasks"
 
-    func fetchTasks() async throws -> [Task] {
+    func fetchTasks() async throws -> [TaskItem] {
         guard let url = URL(string: urlString) else {
             throw NetworkError.invalidURL
         }
@@ -45,13 +45,13 @@ actor TaskService {
                 return taskResponse.data
             }
 
-            return try decoder.decode([Task].self, from: data)
+            return try decoder.decode([TaskItem].self, from: data)
         } catch {
             throw NetworkError.decodingError
         }
     }
 
-    func addTask(task: String, status: Bool = false) async throws -> Task {
+    func addTask(task: String, status: Bool = false) async throws -> TaskItem {
         guard let url = URL(string: urlString) else {
             throw NetworkError.invalidURL
         }
@@ -84,6 +84,6 @@ actor TaskService {
             return createdTask
         }
 
-        return try decoder.decode(Task.self, from: data)
+        return try decoder.decode(TaskItem.self, from: data)
     }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 final class TaskListViewModel: ObservableObject {
-    @Published private(set) var tasks: [Task] = []
+    @Published private(set) var tasks: [TaskItem] = []
     @Published var isLoading = false
     @Published var isAddingTask = false
     @Published var errorMessage: String?

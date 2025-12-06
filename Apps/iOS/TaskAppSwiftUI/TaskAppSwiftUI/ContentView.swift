@@ -45,7 +45,7 @@ struct TaskListScreen: View {
             }
             .alert("Something went wrong", isPresented: errorBinding) {
                 Button("Retry") {
-                    Swift.Task { await viewModel.loadTasks() }
+                    Task { await viewModel.loadTasks() }
                 }
                 Button("Dismiss", role: .cancel) {
                     viewModel.errorMessage = nil
@@ -60,7 +60,7 @@ struct TaskListScreen: View {
                     text: $newTaskText,
                     isSubmitting: viewModel.isAddingTask,
                     onAdd: { text in
-                        Swift.Task {
+                        Task {
                             await viewModel.addTask(description: text)
 
                             if viewModel.errorMessage == nil {
@@ -78,7 +78,7 @@ struct TaskListScreen: View {
         Group {
             if let error = viewModel.errorMessage, viewModel.tasks.isEmpty {
                 ErrorStateView(message: error) {
-                    Swift.Task { await viewModel.loadTasks() }
+                    Task { await viewModel.loadTasks() }
                 }
             } else if viewModel.tasks.isEmpty {
                 EmptyStateView()
@@ -102,7 +102,7 @@ struct TaskListScreen: View {
 }
 
 struct TaskListView: View {
-    let tasks: [Task]
+    let tasks: [TaskItem]
 
     var body: some View {
         List(tasks) { task in
@@ -117,7 +117,7 @@ struct TaskListView: View {
 }
 
 struct TaskRowView: View {
-    let task: Task
+    let task: TaskItem
 
     var body: some View {
         HStack(spacing: 12) {
