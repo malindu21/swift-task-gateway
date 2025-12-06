@@ -42,4 +42,5 @@ jobs:
           npm install -g heroku
           heroku auth:token >/dev/null
           heroku git:remote --app "$HEROKU_APP_NAME"
-          git subtree push --prefix Backend https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git main
+          BACKEND_SHA=$(git subtree split --prefix Backend HEAD)
+          git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git "$BACKEND_SHA":refs/heads/main --force
