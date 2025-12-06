@@ -42,6 +42,7 @@ final class TaskListViewModel: ObservableObject {
         do {
             let createdTask = try await service.addTask(task: trimmed)
             tasks.insert(createdTask, at: 0)
+            await refreshTasksFromServer()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -64,6 +65,7 @@ final class TaskListViewModel: ObservableObject {
         do {
             let updated = try await service.updateTaskStatus(id: task.id, status: toggledStatus)
             tasks = tasks.map { $0.id == updated.id ? updated : $0 }
+            await refreshTasksFromServer()
         } catch {
             tasks = previousTasks
             errorMessage = error.localizedDescription
@@ -81,11 +83,20 @@ final class TaskListViewModel: ObservableObject {
 
         do {
             try await service.deleteTask(id: id)
+            await refreshTasksFromServer()
         } catch {
             tasks = previousTasks
             errorMessage = error.localizedDescription
         }
 
         deletingTaskIds.remove(id)
+    }
+
+    private func refreshTasksFromServer() async {
+        do {
+            tasks = try await service.fetchTasks()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
