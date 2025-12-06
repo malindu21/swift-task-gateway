@@ -1,23 +1,40 @@
 ## Task API (Express + Postgres)
 
+- Clean layered structure: config → db → services → controllers → routes → app entry.
 - Endpoints: `POST /tasks`, `GET /tasks`.
-- Uses Postgres (Heroku-compatible SSL). The server auto-creates a `tasks` table if it does not exist.
+- Uses Postgres (Heroku-compatible SSL). The server auto-creates the `tasks` table.
+
+### Structure
+```
+Backend/
+  src/
+    config/env.js
+    db/{pool.js, init.js}
+    services/taskService.js
+    controllers/taskController.js
+    routes/taskRoutes.js
+    middleware/errorHandler.js
+    utils/asyncHandler.js
+    app.js
+    index.js
+```
 
 ### Install
 ```bash
+cd Backend
 npm install
 ```
 
 ### Configure database
 - Set `POSTGRES_URL` (or `DATABASE_URL`) with a full connection string, e.g. `postgres://user:pass@host:5432/dbname`.
+- Set `PG_SSL=false` to disable SSL locally (default uses SSL for Heroku).
 
 ### Run
 ```bash
-# Run
-POSTGRES_URL="postgres://user:pass@localhost:5432/tasks_db" node server.js
-
-# Optional: set port
-PORT=4000 POSTGRES_URL="..." node server.js
+cd Backend
+POSTGRES_URL="postgres://user:pass@localhost:5432/tasks_db" npm start
+# Optional: custom port
+PORT=4000 POSTGRES_URL="..." npm start
 ```
 
 ### POST /tasks

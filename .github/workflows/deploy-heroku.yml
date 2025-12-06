@@ -18,11 +18,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: Backend/package-lock.json
 
       - name: Install dependencies
+        working-directory: Backend
         run: npm ci
 
       - name: Build (if present)
+        working-directory: Backend
         run: npm run build --if-present
 
       - name: Configure git for deploy
@@ -39,4 +42,4 @@ jobs:
           npm install -g heroku
           heroku auth:token >/dev/null
           heroku git:remote --app "$HEROKU_APP_NAME"
-          git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git HEAD:main
+          git subtree push --prefix Backend https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git main

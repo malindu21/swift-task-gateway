@@ -14,15 +14,20 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: Backend/package-lock.json
 
       - name: Install dependencies
+        working-directory: Backend
         run: npm ci
 
       - name: Build (if present)
+        working-directory: Backend
         run: npm run build --if-present
 
       - name: Test (if present)
+        working-directory: Backend
         run: npm test --if-present
 
       - name: Lint (if present)
+        working-directory: Backend
         run: npm run lint --if-present
