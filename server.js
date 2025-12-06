@@ -15,7 +15,10 @@ const getPool = () => {
     if (!POSTGRES_URL) {
       throw new Error('Missing POSTGRES_URL (or DATABASE_URL) env var for Postgres connection');
     }
-    return new PgPool({ connectionString: POSTGRES_URL });
+    return new PgPool({
+      connectionString: POSTGRES_URL,
+      ssl: { rejectUnauthorized: false }, // Heroku Postgres requires SSL
+    });
   }
 
   if (DB_CLIENT === 'mysql') {
