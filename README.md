@@ -53,7 +53,8 @@ PG_SSL=false npm start   # disable SSL locally; default expects SSL (Heroku)
 ## Running the iOS App
 - Open `Apps/iOS/TaskAppSwiftUI/TaskAppSwiftUI.xcodeproj`.
 - Build/run the `TaskAppSwiftUI` target (iOS Simulator).
-- The app hits `https://swift-task-gateway-743d3a89ff77.herokuapp.com/tasks`. To point at local, swap the base URL in `TaskService.urlString`.
+- Configure `API_BASE_URL` in the iOS target’s Info.plist (or via xcconfig/build setting/CI secret). Example: `https://swift-task-gateway-743d3a89ff77.herokuapp.com`.
+- The app reads `API_BASE_URL` and calls `…/tasks`. For local dev, set `API_BASE_URL` to your tunnel/base.
 
 ### iOS UX Highlights
 - Pull-to-refresh, loading overlay, empty/error states.

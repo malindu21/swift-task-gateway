@@ -21,10 +21,13 @@ enum NetworkError: LocalizedError {
 }
 
 actor TaskService {
-    private let urlString = "https://swift-task-gateway-743d3a89ff77.herokuapp.com/tasks"
+    private var baseTasksURL: URL? {
+        let trimmed = AppConfig.baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        return URL(string: "\(trimmed)/tasks")
+    }
 
     func fetchTasks() async throws -> [TaskItem] {
-        guard let url = URL(string: urlString) else {
+        guard let url = baseTasksURL else {
             throw NetworkError.invalidURL
         }
 
@@ -52,7 +55,7 @@ actor TaskService {
     }
 
     func addTask(task: String, status: Bool = false) async throws -> TaskItem {
-        guard let url = URL(string: urlString) else {
+        guard let url = baseTasksURL else {
             throw NetworkError.invalidURL
         }
 
@@ -92,11 +95,11 @@ actor TaskService {
     }
 
     func updateTaskStatus(id: Int, status: Bool) async throws -> TaskItem {
-        guard let url = URL(string: "\(urlString)/\(id)/status") else {
+        guard let base = baseTasksURL else {
             throw NetworkError.invalidURL
         }
 
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: base.appendingPathComponent("\(id)/status"))
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["status": status])
@@ -126,11 +129,11 @@ actor TaskService {
     }
 
     func deleteTask(id: Int) async throws {
-        guard let url = URL(string: "\(urlString)/\(id)") else {
+        guard let base = baseTasksURL else {
             throw NetworkError.invalidURL
         }
 
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: base.appendingPathComponent("\(id)"))
         request.httpMethod = "DELETE"
 
         let (_, response) = try await URLSession.shared.data(for: request)
